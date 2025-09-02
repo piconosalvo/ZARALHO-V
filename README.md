@@ -1,149 +1,115 @@
--- LocalScript dentro de StarterPlayerScripts
-local player = game.Players.LocalPlayer
-local camera = workspace.CurrentCamera
-local runService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
+-- 🌈 ZARALHO V6 - GUI UNIVERSAL (PC/Mobile/Delta)
 
--- Variáveis
-local aimbotEnabled, espEnabled, invisibleEnabled = false, false, false
-local highlights = {}
+-- Serviços
+local player = game.Players.LocalPlayer
+local runService = game:GetService("RunService")
+local camera = game.Workspace.CurrentCamera
+local uis = game:GetService("UserInputService")
 
 -- GUI Principal
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "ZaralhoV5"
-screenGui.ResetOnSpawn = false
-screenGui.Parent = player:WaitForChild("PlayerGui")
+local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+gui.Name = "ZaralhoV6"
+gui.ResetOnSpawn = false
 
--- Painel
-local panel = Instance.new("Frame", screenGui)
-panel.Size = UDim2.new(0, 460, 0, 420)
-panel.Position = UDim2.new(0.5, -230, 0.5, -210)
-panel.BackgroundColor3 = Color3.fromRGB(20,20,20)
-panel.BorderSizePixel = 0
-panel.Visible = true
+local panel = Instance.new("Frame", gui)
+panel.Size = UDim2.new(0, 500, 0, 420)
+panel.Position = UDim2.new(0.5, -250, 0.5, -210)
+panel.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 panel.Active = true
 panel.Draggable = true
+panel.Visible = true
 
--- Borda RGB
-local uiStroke = Instance.new("UIStroke", panel)
-uiStroke.Thickness = 3
+local stroke = Instance.new("UIStroke", panel)
+stroke.Thickness = 3
 task.spawn(function()
     local hue = 0
     while task.wait() do
-        hue += 0.01
-        if hue > 1 then hue = 0 end
-        uiStroke.Color = Color3.fromHSV(hue,1,1)
+        hue = (hue + 0.01) % 1
+        stroke.Color = Color3.fromHSV(hue, 1, 1)
     end
 end)
 
--- Título
 local title = Instance.new("TextLabel", panel)
-title.Size = UDim2.new(1,0,0,40)
-title.Text = "ZARALHO V5"
-title.TextColor3 = Color3.new(1,1,1)
+title.Size = UDim2.new(1, 0, 0, 40)
+title.Text = "ZARALHO V6"
+title.TextColor3 = Color3.new(1, 1, 1)
 title.BackgroundTransparency = 1
 title.Font = Enum.Font.GothamBold
-title.TextSize = 24
+title.TextSize = 26
 
--- Botão Minimizar
-local buttonMinimize = Instance.new("TextButton", panel)
-buttonMinimize.Size = UDim2.new(0,40,0,40)
-buttonMinimize.Position = UDim2.new(1,-45,0,5)
-buttonMinimize.Text = "-"
-buttonMinimize.TextColor3 = Color3.new(1,1,1)
-buttonMinimize.BackgroundColor3 = Color3.fromRGB(255,0,0)
-buttonMinimize.Font = Enum.Font.GothamBold
-buttonMinimize.TextSize = 22
-buttonMinimize.ZIndex = 10
+local tabs = Instance.new("Frame", panel)
+tabs.Size = UDim2.new(1, 0, 0, 40)
+tabs.Position = UDim2.new(0, 0, 0, 40)
+tabs.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 
--- Bolinha (abre/fecha)
-local ball = Instance.new("Frame", screenGui)
-ball.Size = UDim2.new(0,60,0,60)
-ball.Position = UDim2.new(0.1,0,0.5,0)
-ball.AnchorPoint = Vector2.new(0.5,0.5)
-ball.BackgroundColor3 = Color3.new(0,0,0)
-ball.Visible = false
-ball.ZIndex = 20
-ball.Active = true
-ball.BorderSizePixel = 0
-ball.Name = "ZaralhaBall"
+local pages = {}
+local currentPage = nil
 
-local ballText = Instance.new("TextLabel", ball)
-ballText.Size = UDim2.new(1,0,1,0)
-ballText.BackgroundTransparency = 1
-ballText.Text = "Z"
-ballText.TextColor3 = Color3.new(1,0,0)
-ballText.Font = Enum.Font.GothamBold
-ballText.TextSize = 40
-ballText.ZIndex = 21
-
--- Arrastar a bolinha
-local dragging, dragInput, dragStart, startPos = false
-local function update(input)
-    local delta = input.Position - dragStart
-    ball.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+local function createPage(name)
+    local page = Instance.new("Frame", panel)
+    page.Name = name
+    page.Size = UDim2.new(1, -20, 1, -100)
+    page.Position = UDim2.new(0, 10, 0, 90)
+    page.BackgroundTransparency = 1
+    page.Visible = false
+    pages[name] = page
+    return page
 end
-ball.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        dragging = true
-        dragStart = input.Position
-        startPos = ball.Position
-        input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then
-                dragging = false
-            end
-        end)
-    end
-end)
-ball.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-        dragInput = input
-    end
-end)
-UserInputService.InputChanged:Connect(function(input)
-    if input == dragInput and dragging then
-        update(input)
-    end
-end)
 
--- Minimizar/Abrir
-buttonMinimize.MouseButton1Click:Connect(function()
-    panel.Visible = false
-    ball.Visible = true
-end)
-ball.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        panel.Visible = true
-        ball.Visible = false
+local function switchPage(name)
+    for pageName, pageFrame in pairs(pages) do
+        pageFrame.Visible = (pageName == name)
     end
-end)
-UserInputService.InputBegan:Connect(function(input, gpe)
-    if not gpe and input.KeyCode == Enum.KeyCode.Z then
-        panel.Visible = not panel.Visible
-        ball.Visible = not panel.Visible
-    end
-end)
+    currentPage = pages[name]
+end
 
--- Criador de botões
-local function createButton(tab, text, order)
-    local btn = Instance.new("TextButton", tab)
-    btn.Size = UDim2.new(0,400,0,40)
-    btn.Position = UDim2.new(0,30,0,20 + (order*45))
-    btn.BackgroundColor3 = Color3.fromRGB(50,50,50)
-    btn.TextColor3 = Color3.new(1,1,1)
+local function createTab(label, pageName, index)
+    local btn = Instance.new("TextButton", tabs)
+    btn.Size = UDim2.new(0.25, 0, 1, 0)
+    btn.Position = UDim2.new(0.25 * index, 0, 0, 0)
+    btn.Text = label
+    btn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    btn.TextColor3 = Color3.new(1, 1, 1)
+    btn.Font = Enum.Font.GothamBold
+    btn.TextSize = 18
+    btn.MouseButton1Click:Connect(function()
+        switchPage(pageName)
+    end)
+end
+
+-- Criar páginas
+local config = createPage("Config")
+local combat = createPage("Combat")
+local tools = createPage("Tools")
+local scripts = createPage("Scripts")
+
+-- Criar abas
+createTab("⚙️ Configurações", "Config", 0)
+createTab("🎯 Combate", "Combat", 1)
+createTab("🛠️ Ferramentas", "Tools", 2)
+createTab("📂 Scripts", "Scripts", 3)
+
+switchPage("Config")
+
+-- Funções de criação
+local function createButton(parent, text, order)
+    local btn = Instance.new("TextButton", parent)
+    btn.Size = UDim2.new(0, 380, 0, 40)
+    btn.Position = UDim2.new(0, 20, 0, order * 45)
+    btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    btn.TextColor3 = Color3.new(1, 1, 1)
     btn.Text = text
     btn.Font = Enum.Font.GothamBold
     btn.TextSize = 20
     return btn
 end
 
--- Criador de inputs
-local function createInput(tab, placeholder, default, order)
-    local box = Instance.new("TextBox", tab)
-    box.Size = UDim2.new(0,180,0,40)
-    box.Position = UDim2.new(0,30,0,20 + (order*45))
-    box.BackgroundColor3 = Color3.fromRGB(40,40,40)
-    box.TextColor3 = Color3.new(1,1,1)
+local function createInput(parent, placeholder, default, order)
+    local box = Instance.new("TextBox", parent)
+    box.Size = UDim2.new(0, 180, 0, 40)
+    box.Position = UDim2.new(0, 20, 0, order * 45)
+    box.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    box.TextColor3 = Color3.new(1, 1, 1)
     box.PlaceholderText = placeholder
     box.Text = tostring(default)
     box.Font = Enum.Font.GothamBold
@@ -151,75 +117,33 @@ local function createInput(tab, placeholder, default, order)
     return box
 end
 
--- Criando Tabs
-local tabsFrame = Instance.new("Frame", panel)
-tabsFrame.Size = UDim2.new(1,0,0,30)
-tabsFrame.Position = UDim2.new(0,0,0,40)
-tabsFrame.BackgroundTransparency = 1
+-- ⚙️ CONFIG
+local walkInput = createInput(pages["Config"], "WalkSpeed", 16, 0)
+local jumpInput = createInput(pages["Config"], "JumpPower", 50, 1)
+local flySpeedInput = createInput(pages["Config"], "FlySpeed", 50, 2)
 
-local tabButtons = {}
-local currentTab = nil
-local tabPages = {}
+-- 🎯 COMBATE
+local btnAimbot = createButton(pages["Combat"], "Aimbot: OFF", 0)
+local btnESP = createButton(pages["Combat"], "ESP: OFF", 1)
 
-local function createTab(name, order)
-    local tabBtn = Instance.new("TextButton", tabsFrame)
-    tabBtn.Size = UDim2.new(0,140,1,0)
-    tabBtn.Position = UDim2.new(0,(order*150),0,0)
-    tabBtn.Text = name
-    tabBtn.BackgroundColor3 = Color3.fromRGB(30,30,30)
-    tabBtn.TextColor3 = Color3.new(1,1,1)
-    tabBtn.Font = Enum.Font.GothamBold
-    tabBtn.TextSize = 18
+-- 🛠️ FERRAMENTAS
+local btnTP = createButton(pages["Tools"], "WalkTeleport Tool", 0)
+local btnInvisible = createButton(pages["Tools"], "Invisibilidade: OFF", 1)
+local btnFly = createButton(pages["Tools"], "Fly: OFF", 2)
+local btnFarm = createButton(pages["Tools"], "AutoFarm: OFF", 3)
+local btnCollect = createButton(pages["Tools"], "AutoColeta: OFF", 4)
+local btnNoclip = createButton(pages["Tools"], "Noclip: OFF", 5)
 
-    local page = Instance.new("Frame", panel)
-    page.Size = UDim2.new(1,0,1,-70)
-    page.Position = UDim2.new(0,0,0,70)
-    page.BackgroundTransparency = 1
-    page.Visible = false
+-- 📂 SCRIPTS
+local btnYield = createButton(pages["Scripts"], "Executar Infinite Yield", 0)
+local btnPedro = createButton(pages["Scripts"], "Executar Pedroxz Menu", 1)
 
-    tabBtn.MouseButton1Click:Connect(function()
-        if currentTab then currentTab.Visible = false end
-        page.Visible = true
-        currentTab = page
-    end)
+-- Variáveis de controle
+local aimbotEnabled, espEnabled, invisibleEnabled = false, false, false
+local autoFarmEnabled, autoCollectEnabled, flyEnabled, noclipEnabled = false, false, false, false
+local flySpeed = 50
+local flyingConn, noclipConn
 
-    if not currentTab then
-        page.Visible = true
-        currentTab = page
-    end
-
-    table.insert(tabPages,page)
-    return page
-end
-
--- Abas
-local tabFuncoes = createTab("⚡ Funções",0)
-local tabUtils = createTab("🛠️ Utilitários",1)
-local tabPlayer = createTab("🎮 Player",2)
-
--------------------------
--- ⚡ Funções
--------------------------
-local btnAimbot = createButton(tabFuncoes,"Aimbot: OFF",0)
-local btnESP = createButton(tabFuncoes,"ESP: OFF",1)
-local btnInvisible = createButton(tabFuncoes,"WalkInvisible: OFF",2)
-local btnWalkTP = createButton(tabFuncoes,"WalkTeleport Tool",3)
-
--------------------------
--- 🛠️ Utilitários
--------------------------
-local btnInfinite = createButton(tabUtils,"Executar Infinite Yield",0)
-local btnPedro = createButton(tabUtils,"Executar Pedroxz Menu",1)
-
--------------------------
--- 🎮 Player
--------------------------
-local walkInput = createInput(tabPlayer,"WalkSpeed",16,0)
-local jumpInput = createInput(tabPlayer,"JumpPower",50,1)
-
-----------------------------------------------------------------
--- 📌 Funções
-----------------------------------------------------------------
 -- Aimbot
 runService.RenderStepped:Connect(function()
     if aimbotEnabled and player.Character and player.Character:FindFirstChild("Head") then
@@ -242,28 +166,23 @@ end)
 -- ESP
 local function toggleESP(state)
     for _, plr in ipairs(game.Players:GetPlayers()) do
-        if plr ~= player then
+        if plr ~= player and plr.Character then
             if state then
-                if not highlights[plr] then
-                    local hl = Instance.new("Highlight")
-                    hl.FillTransparency = 1
-                    hl.OutlineColor = Color3.new(1,0,0)
-                    hl.Parent = plr.Character
-                    highlights[plr] = hl
-                end
+                local hl = Instance.new("Highlight", plr.Character)
+                hl.FillTransparency = 1
+                hl.OutlineColor = Color3.new(1, 0, 0)
             else
-                if highlights[plr] then
-                    highlights[plr]:Destroy()
-                    highlights[plr] = nil
+                for _, obj in ipairs(plr.Character:GetChildren()) do
+                    if obj:IsA("Highlight") then obj:Destroy() end
                 end
             end
         end
     end
 end
 
--- Invisível
+-- Invisibilidade
 local function toggleInvisible(state)
-    if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+    if player.Character then
         for _, part in ipairs(player.Character:GetDescendants()) do
             if part:IsA("BasePart") then
                 part.LocalTransparencyModifier = state and 1 or 0
@@ -272,9 +191,107 @@ local function toggleInvisible(state)
     end
 end
 
-----------------------------------------------------------------
--- 📌 Eventos Botões
-----------------------------------------------------------------
+-- Fly
+local function toggleFly()
+    if flyEnabled then
+        flyEnabled = false
+        btnFly.Text = "Fly: OFF"
+        if flyingConn then flyingConn:Disconnect() end
+        if player.Character and player.Character:FindFirstChild("Humanoid") then
+            player.Character.Humanoid.PlatformStand = false
+        end
+    else
+        flyEnabled = true
+        btnFly.Text = "Fly: ON"
+        if player.Character and player.Character:FindFirstChild("Humanoid") then
+            player.Character.Humanoid.PlatformStand = true
+        end
+        flyingConn = runService.RenderStepped:Connect(function()
+            if flyEnabled and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                local hrp = player.Character.HumanoidRootPart
+                local moveDir = Vector3.zero
+                if uis:IsKeyDown(Enum.KeyCode.W) then moveDir = moveDir + camera.CFrame.LookVector end
+                if uis:IsKeyDown(Enum.KeyCode.S) then moveDir = moveDir - camera.CFrame.LookVector end
+                if uis:IsKeyDown(Enum.KeyCode.A) then moveDir = moveDir - camera.CFrame.RightVector end
+                if uis:IsKeyDown(Enum.KeyCode.D) then moveDir = moveDir + camera.CFrame.RightVector end
+                if uis:IsKeyDown(Enum.KeyCode.Space) then moveDir = moveDir + Vector3.new(0,1,0) end
+                if uis:IsKeyDown(Enum.KeyCode.LeftShift) then moveDir = moveDir - Vector3.new(0,1,0) end
+                hrp.Velocity = moveDir.Unit * flySpeed
+            end
+        end)
+    end
+end
+
+-- Noclip
+local function toggleNoclip()
+    if noclipEnabled then
+        noclipEnabled = false
+        btnNoclip.Text = "Noclip: OFF"
+        if noclipConn then noclipConn:Disconnect() end
+    else
+        noclipEnabled = true
+        btnNoclip.Text = "Noclip: ON"
+        noclipConn = runService.Stepped:Connect(function()
+            if player.Character then
+                for _, part in ipairs(player.Character:GetDescendants()) do
+                    if part:IsA("BasePart") and part.CanCollide == true then
+                        part.CanCollide = false
+                    end
+                end
+            end
+        end)
+    end
+end
+
+-- Teleporte Tool
+btnTP.MouseButton1Click:Connect(function()
+    local tool = Instance.new("Tool")
+    tool.RequiresHandle = false
+    tool.Name = "WalkTeleport"
+    tool.Parent = player.Backpack
+    tool.Activated:Connect(function()
+        local mouse = player:GetMouse()
+        if mouse.Hit then
+            player.Character:MoveTo(mouse.Hit.p)
+        end
+    end)
+end)
+
+-- AutoFarm
+runService.RenderStepped:Connect(function()
+    if autoFarmEnabled and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+        local closest, dist = nil, math.huge
+        for _, npc in ipairs(workspace:GetChildren()) do
+            if npc.Name == "FarmNPC" and npc:FindFirstChild("HumanoidRootPart") then
+                local mag = (npc.HumanoidRootPart.Position - player.Character.HumanoidRootPart.Position).Magnitude
+                if mag < dist then
+                    dist = mag
+                    closest = npc
+                end
+            end
+        end
+        if closest then
+            player.Character:MoveTo(closest.HumanoidRootPart.Position + Vector3.new(2, 0, 2))
+        end
+    end
+end)
+
+-- AutoColeta
+runService.RenderStepped:Connect(function()
+    if autoCollectEnabled and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+        for _, obj in ipairs(workspace:GetChildren()) do
+            if obj.Name == "Coletavel" and obj:IsA("BasePart") then
+                local mag = (obj.Position - player.Character.HumanoidRootPart.Position).Magnitude
+                if mag < 10 then
+                    firetouchinterest(player.Character.HumanoidRootPart, obj, 0)
+                    firetouchinterest(player.Character.HumanoidRootPart, obj, 1)
+                end
+            end
+        end
+    end
+end)
+
+-- Botões
 btnAimbot.MouseButton1Click:Connect(function()
     aimbotEnabled = not aimbotEnabled
     btnAimbot.Text = "Aimbot: " .. (aimbotEnabled and "ON" or "OFF")
@@ -288,31 +305,32 @@ end)
 
 btnInvisible.MouseButton1Click:Connect(function()
     invisibleEnabled = not invisibleEnabled
-    btnInvisible.Text = "WalkInvisible: " .. (invisibleEnabled and "ON" or "OFF")
+    btnInvisible.Text = "Invisibilidade: " .. (invisibleEnabled and "ON" or "OFF")
     toggleInvisible(invisibleEnabled)
 end)
 
-btnWalkTP.MouseButton1Click:Connect(function()
-    local tool = Instance.new("Tool")
-    tool.RequiresHandle = false
-    tool.Name = "WalkTeleport"
-    tool.Parent = player.Backpack
-    tool.Activated:Connect(function()
-        local mouse = player:GetMouse()
-        if mouse.Hit then
-            player.Character:MoveTo(mouse.Hit.p)
-        end
-    end)
+btnFly.MouseButton1Click:Connect(toggleFly)
+btnNoclip.MouseButton1Click:Connect(toggleNoclip)
+
+btnFarm.MouseButton1Click:Connect(function()
+    autoFarmEnabled = not autoFarmEnabled
+    btnFarm.Text = "AutoFarm: " .. (autoFarmEnabled and "ON" or "OFF")
 end)
 
-btnInfinite.MouseButton1Click:Connect(function()
-    loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()
+btnCollect.MouseButton1Click:Connect(function()
+    autoCollectEnabled = not autoCollectEnabled
+    btnCollect.Text = "AutoColeta: " .. (autoCollectEnabled and "ON" or "OFF")
+end)
+
+btnYield.MouseButton1Click:Connect(function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
 end)
 
 btnPedro.MouseButton1Click:Connect(function()
-    loadstring(game:HttpGet('https://raw.githubusercontent.com/Pedroxz63/PedroxzMenuAtualizado/refs/heads/main/pedroxzmenuv.2.0.2.md'))()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/Pedroxz63/PedroxzMenuAtualizado/refs/heads/main/pedroxzmenuv.2.0.2.md"))()
 end)
 
+-- Inputs
 walkInput.FocusLost:Connect(function()
     local val = tonumber(walkInput.Text)
     if val and player.Character and player.Character:FindFirstChild("Humanoid") then
@@ -326,3 +344,52 @@ jumpInput.FocusLost:Connect(function()
         player.Character.Humanoid.JumpPower = val
     end
 end)
+
+flySpeedInput.FocusLost:Connect(function()
+    local val = tonumber(flySpeedInput.Text)
+    if val then
+        flySpeed = val
+    end
+end)
+
+-- Bolinha RGB "Z"
+local miniBtn = Instance.new("TextButton", gui)
+miniBtn.Size = UDim2.new(0, 50, 0, 50)
+miniBtn.Position = UDim2.new(0, 20, 0.5, -25)
+miniBtn.Text = "Z"
+miniBtn.Font = Enum.Font.GothamBold
+miniBtn.TextSize = 24
+miniBtn.TextColor3 = Color3.new(1,1,1)
+miniBtn.BackgroundColor3 = Color3.fromRGB(30,30,30)
+miniBtn.Active = true
+miniBtn.Draggable = true
+
+local miniStroke = Instance.new("UIStroke", miniBtn)
+miniStroke.Thickness = 3
+task.spawn(function()
+    local hue = 0
+    while task.wait() do
+        hue = (hue + 0.01) % 1
+        miniStroke.Color = Color3.fromHSV(hue,1,1)
+    end
+end)
+
+miniBtn.MouseButton1Click:Connect(function()
+    panel.Visible = not panel.Visible
+end)
+
+-- Anti-Kick básico
+local mt = getrawmetatable(game)
+local old = mt.__namecall
+setreadonly(mt,false)
+mt.__namecall = newcclosure(function(self,...)
+    local method = getnamecallmethod()
+    if method == "Kick" or method == "kick" then
+        return nil
+    end
+    return old(self,...)
+end)
+setreadonly(mt,true)
+
+end
+end
