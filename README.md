@@ -18,8 +18,8 @@ screenGui.Name = "ZARALHO V4"
 
 -- Painel
 local panel = Instance.new("Frame", screenGui)
-panel.Size = UDim2.new(0, 420, 0, 380)
-panel.Position = UDim2.new(0.5, -210, 0.5, -190)
+panel.Size = UDim2.new(0, 420, 0, 360)
+panel.Position = UDim2.new(0.5, -210, 0.5, -180)
 panel.BackgroundColor3 = Color3.fromRGB(20,20,20)
 panel.BorderSizePixel = 0
 
@@ -46,7 +46,17 @@ title.BackgroundTransparency = 1
 title.Font = Enum.Font.GothamBold
 title.TextSize = 24
 
--- Bolinha Z
+-- Botão Minimizar
+local buttonMinimize = Instance.new("TextButton", panel)
+buttonMinimize.Size = UDim2.new(0,40,0,40)
+buttonMinimize.Position = UDim2.new(1,-45,0,5)
+buttonMinimize.Text = "-"
+buttonMinimize.TextColor3 = Color3.new(1,1,1)
+buttonMinimize.BackgroundColor3 = Color3.fromRGB(255,0,0)
+buttonMinimize.Font = Enum.Font.GothamBold
+buttonMinimize.TextSize = 22
+
+-- Bolinha de Minimizar
 local ball = Instance.new("Frame", screenGui)
 ball.Size = UDim2.new(0,60,0,60)
 ball.Position = UDim2.new(0.1,0,0.5,0)
@@ -65,7 +75,13 @@ ballText.TextColor3 = Color3.new(1,0,0)
 ballText.Font = Enum.Font.GothamBold
 ballText.TextSize = 40
 
--- Dragging bolinha
+-- Minimizar/Abrir
+buttonMinimize.MouseButton1Click:Connect(function()
+    panel.Visible = false
+    ball.Visible = true
+end)
+
+-- Arrastar e clique da bolinha
 local dragging = false
 local dragStart, startPos
 local moved = false
@@ -102,21 +118,6 @@ UIS.InputEnded:Connect(function(input)
     end
 end)
 
--- Botão Minimizar
-local buttonMinimize = Instance.new("TextButton", panel)
-buttonMinimize.Size = UDim2.new(0,40,0,40)
-buttonMinimize.Position = UDim2.new(1,-45,0,5)
-buttonMinimize.Text = "-"
-buttonMinimize.TextColor3 = Color3.new(1,1,1)
-buttonMinimize.BackgroundColor3 = Color3.fromRGB(255,0,0)
-buttonMinimize.Font = Enum.Font.GothamBold
-buttonMinimize.TextSize = 22
-
-buttonMinimize.MouseButton1Click:Connect(function()
-    panel.Visible = false
-    ball.Visible = true
-end)
-
 -- Função criar botão
 local function createButton(text, order)
     local btn = Instance.new("TextButton", panel)
@@ -134,7 +135,7 @@ end
 local function createInput(placeholder, default, order)
     local box = Instance.new("TextBox", panel)
     box.Size = UDim2.new(0,180,0,40)
-    box.Position = UDim2.new(0,20 + (order*190),0,230)
+    box.Position = UDim2.new(0,20 + (order*190),0,280)
     box.BackgroundColor3 = Color3.fromRGB(40,40,40)
     box.TextColor3 = Color3.new(1,1,1)
     box.PlaceholderText = placeholder
@@ -196,7 +197,7 @@ local function toggleESP(state)
 end
 
 -- WalkTeleport Tool
-local function toggleWalkTeleport(state)
+local function toggleWalkTP(state)
     if state then
         walkTPTool = Instance.new("Tool")
         walkTPTool.RequiresHandle = false
@@ -206,9 +207,9 @@ local function toggleWalkTeleport(state)
         walkTPTool.Activated:Connect(function()
             local mouse = player:GetMouse()
             if mouse and mouse.Hit then
-                local pos = mouse.Hit + Vector3.new(0,3,0)
+                local pos = mouse.Hit.p
                 if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                    player.Character.HumanoidRootPart.CFrame = CFrame.new(pos.Position)
+                    player.Character.HumanoidRootPart.CFrame = CFrame.new(pos + Vector3.new(0,3,0))
                 end
             end
         end)
@@ -220,7 +221,7 @@ local function toggleWalkTeleport(state)
     end
 end
 
--- Eventos dos botões
+-- Botões eventos
 btnAimbot.MouseButton1Click:Connect(function()
     aimbotEnabled = not aimbotEnabled
     btnAimbot.Text = "Aimbot: " .. (aimbotEnabled and "ON" or "OFF")
@@ -243,7 +244,7 @@ end)
 btnWalkTP.MouseButton1Click:Connect(function()
     walkTPEnabled = not walkTPEnabled
     btnWalkTP.Text = "WalkTeleport: " .. (walkTPEnabled and "ON" or "OFF")
-    toggleWalkTeleport(walkTPEnabled)
+    toggleWalkTP(walkTPEnabled)
 end)
 
 -- Aplicar valores WS/JP
