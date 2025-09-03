@@ -84,9 +84,9 @@ local tools = createPage("Tools")
 local scripts = createPage("Scripts")
 
 -- Criar abas
-createTab("⚙️ Configurações", "Config", 0)
+createTab("⚙ Configurações", "Config", 0)
 createTab("🎯 Combate", "Combat", 1)
-createTab("🛠️ Ferramentas", "Tools", 2)
+createTab("🛠 Ferramentas", "Tools", 2)
 createTab("📂 Scripts", "Scripts", 3)
 
 switchPage("Config")
@@ -117,7 +117,7 @@ local function createInput(parent, placeholder, default, order)
     return box
 end
 
--- ⚙️ CONFIG
+-- ⚙ CONFIG
 local walkInput = createInput(pages["Config"], "WalkSpeed", 16, 0)
 local jumpInput = createInput(pages["Config"], "JumpPower", 50, 1)
 local flySpeedInput = createInput(pages["Config"], "FlySpeed", 50, 2)
@@ -126,7 +126,7 @@ local flySpeedInput = createInput(pages["Config"], "FlySpeed", 50, 2)
 local btnAimbot = createButton(pages["Combat"], "Aimbot: OFF", 0)
 local btnESP = createButton(pages["Combat"], "ESP: OFF", 1)
 
--- 🛠️ FERRAMENTAS
+-- 🛠 FERRAMENTAS
 local btnTP = createButton(pages["Tools"], "WalkTeleport Tool", 0)
 local btnInvisible = createButton(pages["Tools"], "Invisibilidade: OFF", 1)
 local btnFly = createButton(pages["Tools"], "Fly: OFF", 2)
@@ -390,6 +390,3 @@ mt.__namecall = newcclosure(function(self,...)
     return old(self,...)
 end)
 setreadonly(mt,true)
-
-end
-end
