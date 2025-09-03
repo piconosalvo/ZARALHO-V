@@ -298,3 +298,136 @@ runService.RenderStepped:Connect(function()
         bodyGyro.CFrame = camCF
     end
 end)
+-- BOTÕES DE COMBATE
+local btnAimbot = createButton(combat, "🎯 Aimbot: OFF", 0, function()
+    aimbotEnabled = not aimbotEnabled
+    btnAimbot.Text = "🎯 Aimbot: " .. (aimbotEnabled and "ON" or "OFF")
+end)
+
+local btnESP = createButton(combat, "👁️ ESP: OFF", 1, function()
+    toggleESP(not espEnabled)
+    btnESP.Text = "👁️ ESP: " .. (espEnabled and "ON" or "OFF")
+end)
+
+-- BOTÕES DE TOOLS
+local btnInvisible = createButton(tools, "👻 Invisibilidade: OFF", 0, function()
+    invisibleEnabled = not invisibleEnabled
+    toggleInvisible(invisibleEnabled)
+    btnInvisible.Text = "👻 Invisibilidade: " .. (invisibleEnabled and "ON" or "OFF")
+end)
+
+local btnFarm = createButton(tools, "🌾 AutoFarm: OFF", 1, function()
+    autoFarmEnabled = not autoFarmEnabled
+    btnFarm.Text = "🌾 AutoFarm: " .. (autoFarmEnabled and "ON" or "OFF")
+end)
+
+local btnCollect = createButton(tools, "📦 AutoColeta: OFF", 2, function()
+    autoCollectEnabled = not autoCollectEnabled
+    btnCollect.Text = "📦 AutoColeta: " .. (autoCollectEnabled and "ON" or "OFF")
+end)
+
+local btnNoclip = createButton(tools, "🚪 Noclip: OFF", 3, function()
+    noclipEnabled = not noclipEnabled
+    btnNoclip.Text = "🚪 Noclip: " .. (noclipEnabled and "ON" or "OFF")
+end)
+
+local btnFly = createButton(tools, "✈️ FLY (BETA): OFF", 4, function()
+    if flyEnabled then
+        stopFly()
+        btnFly.Text = "✈️ FLY (BETA): OFF"
+    else
+        startFly()
+        btnFly.Text = "✈️ FLY (BETA): ON"
+    end
+end)
+
+-- BOTÕES DE SCRIPTS
+createButton(scripts, "⚡ Infinite Yield", 0, function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
+end)
+
+createButton(scripts, "🛠️ Pedroxz Menu", 1, function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/Pedroxz63/PedroxzMenuAtualizado/refs/heads/main/pedroxzmenuv.2.0.2.md"))()
+end)
+
+-- SCRIPT HUB (Brookhaven, Blox Fruits, Ink, Fly especial)
+createButton(hub, "🏡 Brookhaven GUI 1", 0, function()
+    loadstring(game:HttpGet("https://pastebin.com/raw/0xTtC3uK"))()
+end)
+
+createButton(hub, "🏡 Brookhaven GUI 2", 1, function()
+    loadstring(game:HttpGet("https://pastebin.com/raw/gb8rG6LV"))()
+end)
+
+createButton(hub, "🏡 Brookhaven GUI 3", 2, function()
+    loadstring(game:HttpGet("https://pastebin.com/raw/QJdQ6G6U"))()
+end)
+
+createButton(hub, "🍏 Blox Fruits GUI 1", 3, function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/Project-BloxFruit/Scripts/main/BF1.lua"))()
+end)
+
+createButton(hub, "🍏 Blox Fruits GUI 2", 4, function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/Project-BloxFruit/Scripts/main/BF2.lua"))()
+end)
+
+createButton(hub, "🍏 Blox Fruits GUI 3", 5, function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/Project-BloxFruit/Scripts/main/BF3.lua"))()
+end)
+
+createButton(hub, "🖌️ Ink Game GUI 1", 6, function()
+    loadstring(game:HttpGet("https://pastebin.com/raw/ZXcvInk1"))()
+end)
+
+createButton(hub, "🖌️ Ink Game GUI 2", 7, function()
+    loadstring(game:HttpGet("https://pastebin.com/raw/ZXcvInk2"))()
+end)
+
+createButton(hub, "🖌️ Ink Game GUI 3", 8, function()
+    loadstring(game:HttpGet("https://pastebin.com/raw/ZXcvInk3"))()
+end)
+
+createButton(hub, "✈️ Fly GUI Especial", 9, function()
+    loadstring(game:HttpGet("https://pastebin.com/raw/1FLYozoneYT"))()
+end)
+
+-- ANTI-KICK
+for _, v in pairs(getconnections(player.Idled)) do
+    v:Disable()
+end
+player.CharacterAdded:Connect(function(char)
+    char:WaitForChild("Humanoid").Changed:Connect(function()
+        pcall(function()
+            player.Character.Humanoid:ChangeState(11)
+        end)
+    end)
+end)
+
+-- BOTÃO DE MINIMIZAR
+local miniBtn = Instance.new("TextButton", gui)
+miniBtn.Size = UDim2.new(0,50,0,50)
+miniBtn.Position = UDim2.new(0,20,0.5,-25)
+miniBtn.BackgroundColor3 = Color3.fromRGB(30,30,30)
+miniBtn.Text = "Z"
+miniBtn.Font = Enum.Font.GothamBold
+miniBtn.TextSize = 22
+miniBtn.TextColor3 = Color3.new(1,1,1)
+miniBtn.Active = true
+miniBtn.Draggable = true
+
+-- Stroke RGB na bolinha
+local miniStroke = Instance.new("UIStroke", miniBtn)
+miniStroke.Thickness = 2
+task.spawn(function()
+    local hue = 0
+    while task.wait() do
+        hue = (hue + 0.01) % 1
+        miniStroke.Color = Color3.fromHSV(hue, 1, 1)
+    end
+end)
+
+local minimized = false
+miniBtn.MouseButton1Click:Connect(function()
+    minimized = not minimized
+    panel.Visible = not minimized
+end)
